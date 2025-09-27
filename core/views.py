@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-
+from .models import Profile
 
 def home_view(request):
     return render(request, 'register.html')
@@ -59,3 +59,24 @@ def logout_user(request):
 @login_required(login_url='login')   # Redirects to login if not authenticated
 def dashboard(request):
     return render(request, 'dashboard.html')
+
+
+
+@login_required(login_url='login')
+def my_profile(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == "POST":
+        profile.address = request.POST.get("address")
+        profile.dob = request.POST.get("dob") or None
+        profile.gender = request.POST.get("gender")
+        profile.current_skills = request.POST.get("current_skills")
+        profile.current_job = request.POST.get("current_job")
+        profile.current_salary = request.POST.get("current_salary")
+        profile.dream_role = request.POST.get("dream_role")
+
+        profile.save()
+        messages.success(request, "Profile updated successfully!")
+        return redirect("my_profile")
+
+    return render(request, "my_profile.html", {"profile": profile})
