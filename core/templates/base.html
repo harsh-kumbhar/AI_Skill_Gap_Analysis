@@ -12,11 +12,22 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .sidebar {
-      height: 100vh;
-      background: linear-gradient(180deg, #1c2b4d, #16243a);
-      color: #fff;
-      padding: 20px;
-    }
+  position: fixed;          /* stick it to the side */
+  top: 0;
+  left: 0;
+  height: 100%;             /* take full page height */
+  width: 220px;             /* fixed width */
+  background: linear-gradient(180deg, #1c2b4d, #16243a);
+  color: #fff;
+  padding: 20px;
+  overflow-y: auto;         /* scroll if sidebar content is too long */
+}
+
+.content {
+  margin-left: 220px;       /* push content to the right */
+  padding: 30px;
+  width: calc(100% - 220px);
+}
     .sidebar h2 {
       font-size: 20px;
       margin-bottom: 30px;
@@ -30,9 +41,7 @@
     .sidebar a:hover {
       color: #fff;
     }
-    .content {
-      padding: 30px;
-    }
+
     footer {
       margin-top: 30px;
       text-align: center;
@@ -47,7 +56,7 @@
   <div class="sidebar">
     <h2>Dashboard</h2>
     <a href="{% url 'dashboard' %}">Home</a>
-    <a href="#">My Profile</a>
+    <a href="{% url 'my_profile' %}">My Profile</a>
     <a href="#">Skill Analysis</a>
     <a href="#">Course Recommendations</a>
   </div>

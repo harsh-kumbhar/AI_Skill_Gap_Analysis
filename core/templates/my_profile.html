@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="card shadow p-4 mx-auto" style="max-width: 700px;">
+  <h2 class="text-center mb-4">My Profile</h2>
+  
+  <form method="POST">
+    {% csrf_token %}
+
+    <!-- Address -->
+    <div class="mb-3">
+      <label class="form-label">Address</label>
+      <input type="text" name="address" class="form-control" 
+             value="{{ profile.address|default:'' }}" placeholder="Enter your address">
+    </div>
+
+    <!-- Date of Birth -->
+    <div class="mb-3">
+      <label class="form-label">Date of Birth</label>
+      <input type="date" name="dob" class="form-control" 
+             value="{{ profile.dob|date:'Y-m-d' }}">
+    </div>
+
+    <!-- Gender -->
+    <div class="mb-3">
+      <label class="form-label">Gender</label><br>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="gender" value="Male"
+          {% if profile.gender == "Male" %}checked{% endif %}>
+        <label class="form-check-label">Male</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="gender" value="Female"
+          {% if profile.gender == "Female" %}checked{% endif %}>
+        <label class="form-check-label">Female</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="gender" value="Other"
+          {% if profile.gender == "Other" %}checked{% endif %}>
+        <label class="form-check-label">Other</label>
+      </div>
+    </div>
+
+    <!-- Current Skills -->
+    <div class="mb-3">
+      <label class="form-label">Current Skills</label>
+      <textarea name="skills" rows="3" class="form-control" 
+        placeholder="e.g. Python, Django, SQL">{{ profile.skills|default:'' }}</textarea>
+    </div>
+
+    <!-- Current Job -->
+    <div class="mb-3">
+      <label class="form-label">Current Job</label>
+      <input type="text" name="job" class="form-control"
+             value="{{ profile.job|default:'' }}" placeholder="Enter your current job">
+    </div>
+
+    <!-- Current Salary -->
+    <div class="mb-3">
+      <label class="form-label">Current Salary</label>
+      <select name="salary" class="form-select">
+        <option value=""><-- Select Salary --></option>
+        <option value="<3L" {% if profile.salary == "<3L" %}selected{% endif %}><3L</option>
+        <option value="3-6L" {% if profile.salary == "3-6L" %}selected{% endif %}>3-6L</option>
+        <option value="6-10L" {% if profile.salary == "6-10L" %}selected{% endif %}>6-10L</option>
+        <option value="10L+" {% if profile.salary == "10L+" %}selected{% endif %}>10L+</option>
+      </select>
+    </div>
+
+    <!-- Dream Role -->
+    <div class="mb-3">
+      <label class="form-label">Dream Role</label>
+      <input type="text" name="dream_role" class="form-control"
+             value="{{ profile.dream_role|default:'' }}" placeholder="Your dream role">
+    </div>
+
+    <!-- Submit Button -->
+    <div class="d-grid">
+      <button type="submit" class="btn btn-success">Save Profile</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

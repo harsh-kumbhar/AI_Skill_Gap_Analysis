@@ -13,6 +13,6 @@ urlpatterns = [
 
     # Dashboard (protected)
     path('dashboard/', views.dashboard, name="dashboard"),
-    path("profile/", views.my_profile, name="my_profile"),
+    path("my_profile/", views.my_profile, name="my_profile"),
 
 ]
