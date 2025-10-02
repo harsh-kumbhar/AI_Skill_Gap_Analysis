@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Profile
+from .models import Profile,Skill
 
 def home_view(request):
     return render(request, 'register.html')
@@ -26,6 +26,7 @@ def register_user(request):
 
         user = User.objects.create_user(username=username, email=email, password=password)
         user.save()
+        # Profile auto-created via signals.py
         messages.success(request, "Account created successfully! Please login.")
         return redirect('login')
 
@@ -42,7 +43,7 @@ def login_user(request):
 
         if user is not None:
             login(request, user)
-            return redirect('dashboard')  # redirect to dashboard after login
+            return redirect('dashboard')
         else:
             messages.error(request, "Invalid credentials")
             return redirect('login')
@@ -56,10 +57,10 @@ def logout_user(request):
     return redirect('login')
 
 
-@login_required(login_url='login')   # Redirects to login if not authenticated
+@login_required(login_url='login')
 def dashboard(request):
-    return render(request, 'dashboard.html')
-
+    profile = request.user.profile  # guaranteed to exist
+    return render(request, "dashboard.html", {"profile": profile})
 
 
 @login_required(login_url='login')
@@ -70,13 +71,39 @@ def my_profile(request):
         profile.address = request.POST.get("address")
         profile.dob = request.POST.get("dob") or None
         profile.gender = request.POST.get("gender")
-        profile.current_skills = request.POST.get("current_skills")
+
+        # ✅ Skills handling (IDs + new skill names)
+        selected_skills = request.POST.getlist("skills[]")
+        skill_objs = []
+        for val in selected_skills:
+            if val.isdigit():
+                # existing skill (ID)
+                skill = Skill.objects.filter(id=int(val)).first()
+            else:
+                # new skill (name)
+                skill, _ = Skill.objects.get_or_create(name=val)
+            if skill:
+                skill_objs.append(skill)
+
+        profile.skills.set(skill_objs)
+
         profile.current_job = request.POST.get("current_job")
         profile.current_salary = request.POST.get("current_salary")
         profile.dream_role = request.POST.get("dream_role")
+
+        # Resume file upload
+        if request.FILES.get("resume"):
+            profile.resume = request.FILES["resume"]
+
+        # Profile Picture upload
+        if request.FILES.get("profile_pic"):
+            profile.profile_pic = request.FILES["profile_pic"]
 
         profile.save()
         messages.success(request, "Profile updated successfully!")
         return redirect("my_profile")
 
-    return render(request, "my_profile.html", {"profile": profile})
+    return render(request, "my_profile.html", {
+        "profile": profile,
+        "all_skills": Skill.objects.all()
+    })

@@ -2,7 +2,12 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import date
 
-# Extend user profile later for extra fields
+class Skill(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+        
 class Profile(models.Model):
     GENDER_CHOICES = (
         ('M', 'Male'),
@@ -17,25 +22,40 @@ class Profile(models.Model):
         ('10L+', 'More than 10 LPA'),
     )
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    #Personal Details
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+
+    # Personal Details
     address = models.CharField(max_length=255, blank=True, null=True)
     dob = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True)
 
-    current_skills = models.TextField(blank=True, null=True)  # comma-separated for now
+    # Career Details
+    skills = models.ManyToManyField(Skill, blank=True)
     current_job = models.CharField(max_length=100, blank=True, null=True)
     current_salary = models.CharField(max_length=10, choices=SALARY_CHOICES, blank=True, null=True)
-
     dream_role = models.CharField(max_length=100, blank=True, null=True)
-        # Resume field (optional, in case we later upload)
+    profile_pic = models.ImageField(upload_to="profile_pic/", blank=True, null=True)
+
+    # Resume field (optional, in case we later upload)
+    # models.py
     resume = models.FileField(upload_to='resumes/', blank=True, null=True)
+
+def clean(self):
+    import os
+    from django.core.exceptions import ValidationError
+    if self.resume:
+        ext = os.path.splitext(self.resume.name)[1].lower()
+        if ext != ".pdf":
+            raise ValidationError("Only PDF files are allowed for resume upload.")
 
     def __str__(self):
         return self.user.username
 
+    @property
     def age(self):
         if self.dob:
             today = date.today()
-            return today.year - self.dob.year - ((today.month, today.day) < (self.dob.month, self.dob.day))
+            return today.year - self.dob.year - (
+                (today.month, today.day) < (self.dob.month, self.dob.day)
+            )
         return None

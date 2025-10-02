@@ -3,71 +3,79 @@
 
 {% block content %}
 <div class="card shadow p-4 mx-auto" style="max-width: 700px;">
-  <h2 class="text-center mb-4">My Profile</h2>
+  <h2 class="text-center mb-4"><i class="bi bi-person-circle me-2"></i> My Profile</h2>
   
-  <form method="POST">
+  <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-
+  
     <!-- Address -->
     <div class="mb-3">
       <label class="form-label">Address</label>
       <input type="text" name="address" class="form-control" 
              value="{{ profile.address|default:'' }}" placeholder="Enter your address">
     </div>
-
+  
     <!-- Date of Birth -->
     <div class="mb-3">
       <label class="form-label">Date of Birth</label>
       <input type="date" name="dob" class="form-control" 
              value="{{ profile.dob|date:'Y-m-d' }}">
     </div>
-
+  
     <!-- Gender -->
     <div class="mb-3">
       <label class="form-label">Gender</label><br>
       <div class="form-check form-check-inline">
-        <input class="form-check-input" type="radio" name="gender" value="Male"
-          {% if profile.gender == "Male" %}checked{% endif %}>
+        <input class="form-check-input" type="radio" name="gender" value="M"
+          {% if profile.gender == "M" %}checked{% endif %}>
         <label class="form-check-label">Male</label>
       </div>
       <div class="form-check form-check-inline">
-        <input class="form-check-input" type="radio" name="gender" value="Female"
-          {% if profile.gender == "Female" %}checked{% endif %}>
+        <input class="form-check-input" type="radio" name="gender" value="F"
+          {% if profile.gender == "F" %}checked{% endif %}>
         <label class="form-check-label">Female</label>
       </div>
       <div class="form-check form-check-inline">
-        <input class="form-check-input" type="radio" name="gender" value="Other"
-          {% if profile.gender == "Other" %}checked{% endif %}>
+        <input class="form-check-input" type="radio" name="gender" value="O"
+          {% if profile.gender == "O" %}checked{% endif %}>
         <label class="form-check-label">Other</label>
       </div>
     </div>
-
-    <!-- Current Skills -->
+  
+    <!-- Skills (Select2 Multi-tag) -->
     <div class="mb-3">
-      <label class="form-label">Current Skills</label>
-      <textarea name="skills" rows="3" class="form-control" 
-        placeholder="e.g. Python, Django, SQL">{{ profile.skills|default:'' }}</textarea>
-    </div>
+      <label class="form-label">Skills</label>
+      <select name="skills[]" class="form-select select2" multiple>
+        {% for skill in all_skills %}
+          <option value="{{ skill.id }}" 
+            {% if skill in profile.skills.all %}selected{% endif %}>
+            {{ skill.name }}
+          </option>
+        {% endfor %}
+      </select>
 
+      <small class="text-muted">You can add multiple skills</small>
+    </div>
+  
     <!-- Current Job -->
     <div class="mb-3">
       <label class="form-label">Current Job</label>
-      <input type="text" name="job" class="form-control"
-             value="{{ profile.job|default:'' }}" placeholder="Enter your current job">
+      <input type="text" name="current_job" class="form-control"
+             value="{{ profile.current_job|default:'' }}" placeholder="Enter your current job">
     </div>
-
+  
     <!-- Current Salary -->
     <div class="mb-3">
       <label class="form-label">Current Salary</label>
-      <select name="salary" class="form-select">
+      <select name="current_salary" class="form-select">
         <option value=""><-- Select Salary --></option>
-        <option value="<3L" {% if profile.salary == "<3L" %}selected{% endif %}><3L</option>
-        <option value="3-6L" {% if profile.salary == "3-6L" %}selected{% endif %}>3-6L</option>
-        <option value="6-10L" {% if profile.salary == "6-10L" %}selected{% endif %}>6-10L</option>
-        <option value="10L+" {% if profile.salary == "10L+" %}selected{% endif %}>10L+</option>
+        <option value="<3L" {% if profile.current_salary == "<3L" %}selected{% endif %}><3L</option>
+        <option value="3-6L" {% if profile.current_salary == "3-6L" %}selected{% endif %}>3-6L</option>
+        <option value="6-10L" {% if profile.current_salary == "6-10L" %}selected{% endif %}>6-10L</option>
+        <option value="10L+" {% if profile.current_salary == "10L+" %}selected{% endif %}>10L+</option>
       </select>
     </div>
-
+  
     <!-- Dream Role -->
     <div class="mb-3">
       <label class="form-label">Dream Role</label>
@@ -75,10 +83,79 @@
              value="{{ profile.dream_role|default:'' }}" placeholder="Your dream role">
     </div>
 
+    <!-- Profile Picture Upload -->
+    <div class="mb-3">
+      <label class="form-label">Profile Picture (optional)</label>
+      <input type="file" name="profile_pic" class="form-control" accept="image/*" onchange="previewImage(event)">
+      {% if profile.profile_pic %}
+        <div class="mt-2">
+          <img src="{{ profile.profile_pic.url }}" alt="Profile Pic" class="img-thumbnail" style="max-width: 120px;">
+        </div>
+      {% endif %}
+      <div id="preview" class="mt-2"></div>
+    </div>
+  
+    <!-- Resume Upload (Drag & Drop) -->
+    <div class="mb-3">
+      <label class="form-label">Upload Resume (PDF)</label>
+      <div id="resume-dropzone" class="border border-2 border-dashed rounded p-4 text-center bg-light">
+        <i class="bi bi-upload fs-2 text-success"></i>
+        <p class="mt-2 mb-1">Drag & Drop your resume here or click to browse</p>
+      <input type="file" name="resume" id="resume-input" class="d-none" accept="application/pdf">
+      </div>
+      {% if profile.resume %}
+        <p class="mt-2">Current Resume: <a href="{{ profile.resume.url }}" target="_blank">View Resume</a></p>
+      {% endif %}
+    </div>
+  
     <!-- Submit Button -->
     <div class="d-grid">
-      <button type="submit" class="btn btn-success">Save Profile</button>
+      <button type="submit" class="btn btn-success"><i class="bi bi-save me-2"></i> Save Profile</button>
     </div>
-  </form>
+  </form>  
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Initialize Select2
+  $(document).ready(function() {
+    $('.select2').select2({
+      placeholder: "Select or add skills",
+      tags: true,
+      width: '100%'
+    });
+  });
+
+  // Profile Picture Preview
+  function previewImage(event) {
+    let reader = new FileReader();
+    reader.onload = function(){
+      let output = document.getElementById('preview');
+      output.innerHTML = `<img src="${reader.result}" class="img-thumbnail" style="max-width: 120px;">`;
+    };
+    reader.readAsDataURL(event.target.files[0]);
+  }
+
+  // Drag & Drop Resume Upload
+  const dropzone = document.getElementById("resume-dropzone");
+  const resumeInput = document.getElementById("resume-input");
+
+  dropzone.addEventListener("click", () => resumeInput.click());
+
+  dropzone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropzone.classList.add("bg-success", "text-white");
+  });
+
+  dropzone.addEventListener("dragleave", () => {
+    dropzone.classList.remove("bg-success", "text-white");
+  });
+
+  dropzone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropzone.classList.remove("bg-success", "text-white");
+    resumeInput.files = e.dataTransfer.files;
+  });
+</script>
 {% endblock %}
