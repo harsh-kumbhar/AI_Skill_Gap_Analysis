@@ -26,6 +26,7 @@
     </div>
     <small class="text-muted">Complete your profile to get better recommendations</small>
   </div>
+  
 
   <!-- Profile Summary -->
   <div class="card shadow p-4 mb-4">
@@ -45,6 +46,19 @@
 </p>
     <p><strong><i class="bi bi-stars me-2"></i> Dream Job:</strong> {{ profile.dream_role|default:"Not updated yet" }}</p>
   </div>
+
+<div class="card mt-3 shadow">
+  <div class="card-body text-center">
+    <h5 class="card-title"><i class="bi bi-file-earmark-person me-2"></i> My Resume</h5>
+    {% if profile and profile.resume %}
+        <a href="{{ profile.resume.url }}" target="_blank" class="btn btn-primary">
+            View Resume
+        </a>
+    {% else %}
+        <p class="text-muted">No resume uploaded yet.</p>
+    {% endif %}
+  </div>
+</div>
 
   <!-- Quick Actions -->
   <div class="card shadow p-4">

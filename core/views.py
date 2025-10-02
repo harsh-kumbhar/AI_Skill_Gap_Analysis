@@ -57,11 +57,13 @@ def logout_user(request):
     return redirect('login')
 
 
-@login_required(login_url='login')
+@login_required
 def dashboard(request):
-    profile = request.user.profile  # guaranteed to exist
-    return render(request, "dashboard.html", {"profile": profile})
-
+    profile = Profile.objects.get(user=request.user)
+    context = {
+        "profile": profile
+    }
+    return render(request, "dashboard.html", context)
 
 @login_required(login_url='login')
 def my_profile(request):
