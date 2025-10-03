@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Profile,Skill
+from .models import Profile,Skill,DreamRole
 
 def home_view(request):
     return render(request, 'register.html')
@@ -74,15 +74,21 @@ def my_profile(request):
         profile.dob = request.POST.get("dob") or None
         profile.gender = request.POST.get("gender")
 
+                # ✅ Correct dream_role assignment
+        dream_role_id = request.POST.get("dream_role")
+        if dream_role_id:
+            profile.dream_role_id = dream_role_id
+        else:
+            profile.dream_role = None
+
+
         # ✅ Skills handling (IDs + new skill names)
         selected_skills = request.POST.getlist("skills[]")
         skill_objs = []
         for val in selected_skills:
             if val.isdigit():
-                # existing skill (ID)
                 skill = Skill.objects.filter(id=int(val)).first()
             else:
-                # new skill (name)
                 skill, _ = Skill.objects.get_or_create(name=val)
             if skill:
                 skill_objs.append(skill)
@@ -91,7 +97,7 @@ def my_profile(request):
 
         profile.current_job = request.POST.get("current_job")
         profile.current_salary = request.POST.get("current_salary")
-        profile.dream_role = request.POST.get("dream_role")
+
 
         # Resume file upload
         if request.FILES.get("resume"):
@@ -107,5 +113,6 @@ def my_profile(request):
 
     return render(request, "my_profile.html", {
         "profile": profile,
-        "all_skills": Skill.objects.all()
+        "all_skills": Skill.objects.all(),
+        "all_dream_roles": DreamRole.objects.all()  # 👈 send dream jobs
     })

@@ -76,12 +76,21 @@
       </select>
     </div>
   
-    <!-- Dream Role -->
-    <div class="mb-3">
-      <label class="form-label">Dream Role</label>
-      <input type="text" name="dream_role" class="form-control"
-             value="{{ profile.dream_role|default:'' }}" placeholder="Your dream role">
-    </div>
+<!-- Dream Role -->
+<div class="mb-3">
+  <label class="form-label">Dream Role</label>
+  <select name="dream_role" class="form-select select2">
+    <option value="">-- Select Dream Role --</option>
+    {% for role in all_dream_roles %}
+      <option value="{{ role.id }}" 
+        {% if profile.dream_role and profile.dream_role.id == role.id %}selected{% endif %}>
+        {{ role.name }}
+      </option>
+    {% endfor %}
+  </select>
+</div>
+
+
 
     <!-- Profile Picture Upload -->
     <div class="mb-3">

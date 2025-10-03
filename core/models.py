@@ -33,13 +33,20 @@ class Profile(models.Model):
     skills = models.ManyToManyField(Skill, blank=True)
     current_job = models.CharField(max_length=100, blank=True, null=True)
     current_salary = models.CharField(max_length=10, choices=SALARY_CHOICES, blank=True, null=True)
-    dream_role = models.CharField(max_length=100, blank=True, null=True)
+    dream_role = models.ForeignKey("DreamRole", on_delete=models.SET_NULL, null=True, blank=True)
     profile_pic = models.ImageField(upload_to="profile_pic/", blank=True, null=True)
 
     # Resume field (optional, in case we later upload)
     # models.py
     resume = models.FileField(upload_to='resumes/', blank=True, null=True)
 
+class DreamRole(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    skills = models.ManyToManyField("Skill", related_name="dream_role")
+
+    def __str__(self):
+        return self.name
+    
 def clean(self):
     import os
     from django.core.exceptions import ValidationError
@@ -59,3 +66,5 @@ def clean(self):
                 (today.month, today.day) < (self.dob.month, self.dob.day)
             )
         return None
+
+
