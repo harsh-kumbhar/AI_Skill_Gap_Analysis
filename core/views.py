@@ -124,15 +124,33 @@ def skill_analysis(request):
     dream_role = profile.dream_role
 
     # Fetch current user skills
-    user_skills = profile.skills.all()
+    user_skills = list(profile.skills.values_list("name", flat=True))
 
     # Fetch dream role required skills
-    dream_role_skills = dream_role.skills.all() if dream_role else []
+    dream_role_skills = list(dream_role.skills.values_list("name", flat=True)) if dream_role else []
+
+    # Skill matching logic
+    matched_skills = [skill for skill in user_skills if skill in dream_role_skills]
+    missing_skills = [skill for skill in dream_role_skills if skill not in user_skills]
+
+    # (Optional) Recommend related skills for improvement — can be static or ML-based later
+    # Example: based on missing skills, recommend similar or complementary skills
+    recommendations = []
+    if "Python" in missing_skills:
+        recommendations.append("Learn Django or Flask for backend dev")
+    if "Machine Learning" in missing_skills:
+        recommendations.append("Explore TensorFlow or Scikit-learn")
+    if "Communication" in missing_skills:
+        recommendations.append("Practice with public speaking or presentation tools")
 
     context = {
         "profile": profile,
-        "user_skills": user_skills,
         "dream_role": dream_role,
+        "user_skills": user_skills,
         "dream_role_skills": dream_role_skills,
+        "matched_skills": matched_skills,
+        "missing_skills": missing_skills,
+        "recommendations": recommendations,
     }
+
     return render(request, "skill_analysis.html", context)

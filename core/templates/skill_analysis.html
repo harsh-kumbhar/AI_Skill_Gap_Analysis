@@ -7,7 +7,7 @@
   <!-- Header -->
   <div class="text-center mb-5">
     <h2 class="fw-bold display-6 text-gradient">Skill Analysis Tool 🧠</h2>
-    <p class="text-muted fs-5">Compare your strengths with your dream role requirements and find areas to improve.</p>
+    <p class="text-muted fs-5">See how close you are to your dream role and get personalized growth insights.</p>
   </div>
 
   <!-- Profile Card -->
@@ -31,54 +31,91 @@
     </div>
   </div>
 
-  <!-- Skill Comparison Cards -->
-  <div class="row g-4">
-    <!-- Current Skills -->
-    <div class="col-md-6">
-      <div class="card border-0 shadow-sm rounded-4 h-100 hover-card">
-        <div class="card-body">
-          <h5 class="fw-bold text-success mb-3"><i class="bi bi-person-check me-2"></i>Your Current Skills</h5>
-          {% if user_skills %}
-            <div class="d-flex flex-wrap">
-              {% for skill in user_skills %}
-                <span class="badge bg-success-subtle text-success border border-success-subtle me-2 mb-2 px-3 py-2 rounded-pill">
-                  {{ skill.name }}
-                </span>
-              {% endfor %}
-            </div>
-          {% else %}
-            <p class="text-muted">No skills added yet.</p>
-          {% endif %}
-        </div>
-      </div>
-    </div>
+  <!-- 1️⃣ Skill Match Overview -->
+  <div class="card border-0 shadow-sm mb-5 rounded-4 p-4">
+    <h5 class="fw-bold text-center mb-3">Skill Match Overview</h5>
 
-    <!-- Dream Role Skills -->
-    <div class="col-md-6">
-      <div class="card border-0 shadow-sm rounded-4 h-100 hover-card">
-        <div class="card-body">
-          <h5 class="fw-bold text-primary mb-3"><i class="bi bi-briefcase me-2"></i>Skills Required for {{ profile.dream_role.name|default:"Dream Job" }}</h5>
-          {% if dream_role_skills %}
-            <div class="d-flex flex-wrap">
-              {% for skill in dream_role_skills %}
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle me-2 mb-2 px-3 py-2 rounded-pill">
-                  {{ skill.name }}
-                </span>
-              {% endfor %}
-            </div>
-          {% else %}
-            <p class="text-muted">No skills mapped to this dream role yet.</p>
-          {% endif %}
-        </div>
-      </div>
+    <div style="width: 300px; height: 300px; margin: 0 auto;">
+      <canvas id="matchChart"></canvas>
     </div>
   </div>
 
-  <!-- Comparison Placeholder -->
-  <div id="comparison-results" class="mt-5">
-    <!-- Dynamic skill gap results will appear here -->
+  <!-- 2️⃣ Matched Skills -->
+  <div class="card border-0 shadow-sm mb-4 rounded-4 p-4">
+    <h5 class="fw-bold text-success mb-3"><i class="bi bi-check-circle-fill me-2"></i>Matched Skills</h5>
+    {% if matched_skills %}
+      <div class="d-flex flex-wrap">
+        {% for skill in matched_skills %}
+          <span class="badge bg-success text-white me-2 mb-2 px-3 py-2 rounded-pill shadow-sm">{{ skill }}</span>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">No matched skills found yet.</p>
+    {% endif %}
   </div>
+
+  <!-- 3️⃣ Missing Skills -->
+  <div class="card border-0 shadow-sm mb-4 rounded-4 p-4">
+    <h5 class="fw-bold text-warning mb-3"><i class="bi bi-exclamation-triangle-fill me-2"></i>Missing Skills</h5>
+    {% if missing_skills %}
+      <div class="d-flex flex-wrap">
+        {% for skill in missing_skills %}
+          <span class="badge bg-warning text-dark me-2 mb-2 px-3 py-2 rounded-pill shadow-sm">
+            {{ skill }}
+            <a href="{% url 'my_profile' %}" class="text-decoration-none text-dark ms-2">
+              <i class="bi bi-plus-circle"></i>
+            </a>
+          </span>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">No missing skills — great job!</p>
+    {% endif %}
+  </div>
+
+  <!-- 4️⃣ AI Recommendations -->
+  <div class="card border-0 shadow-sm rounded-4 p-4 bg-gradient-light">
+    <h5 class="fw-bold text-primary mb-3"><i class="bi bi-lightbulb me-2"></i>AI Recommendations</h5>
+    {% if recommendations %}
+      <ul class="list-group list-group-flush">
+        {% for rec in recommendations %}
+          <li class="list-group-item border-0 bg-transparent">
+            <i class="bi bi-stars text-primary me-2"></i>{{ rec }}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-muted">No specific recommendations yet.</p>
+    {% endif %}
+  </div>
+
 </div>
+
+<!-- ✅ Chart.js Visualization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('matchChart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Matched Skills', 'Missing Skills'],
+        datasets: [{
+          data: [{{ matched_skills|length }}, {{ missing_skills|length }}],
+          backgroundColor: ['#28a745', '#ffc107'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        cutout: '70%',
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+  }
+</script>
 
 <style>
   .text-gradient {
@@ -86,14 +123,16 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+  .bg-gradient-light {
+    background: linear-gradient(180deg, #ffffff, #f8f9fa);
+  }
   .hover-card:hover {
     transform: translateY(-4px);
     transition: all 0.2s ease;
     box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.1);
   }
-  .bg-success-subtle { background-color: #e8f5e9 !important; }
-  .bg-primary-subtle { background-color: #e3f2fd !important; }
-  .border-success-subtle { border-color: #a5d6a7 !important; }
-  .border-primary-subtle { border-color: #90caf9 !important; }
+  .badge {
+    font-size: 0.9rem;
+  }
 </style>
 {% endblock %}
