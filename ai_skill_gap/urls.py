@@ -17,5 +17,5 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name="dashboard"),
     path("my_profile/", views.my_profile, name="my_profile"),
 
-
+    path("skill_analysis/", views.skill_analysis, name="skill_analysis"),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

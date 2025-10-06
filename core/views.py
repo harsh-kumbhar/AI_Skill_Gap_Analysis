@@ -116,3 +116,23 @@ def my_profile(request):
         "all_skills": Skill.objects.all(),
         "all_dream_roles": DreamRole.objects.all()  # 👈 send dream jobs
     })
+
+
+@login_required(login_url='login')
+def skill_analysis(request):
+    profile = request.user.profile
+    dream_role = profile.dream_role
+
+    # Fetch current user skills
+    user_skills = profile.skills.all()
+
+    # Fetch dream role required skills
+    dream_role_skills = dream_role.skills.all() if dream_role else []
+
+    context = {
+        "profile": profile,
+        "user_skills": user_skills,
+        "dream_role": dream_role,
+        "dream_role_skills": dream_role_skills,
+    }
+    return render(request, "skill_analysis.html", context)
