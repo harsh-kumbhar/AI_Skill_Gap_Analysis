@@ -118,30 +118,46 @@ def my_profile(request):
     })
 
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .utils import extract_skills_from_resume  # 👈 make sure utils.py is in the same app
+
 @login_required(login_url='login')
 def skill_analysis(request):
     profile = request.user.profile
     dream_role = profile.dream_role
 
-    # Fetch current user skills
+    # --- Default user skills from profile ---
     user_skills = list(profile.skills.values_list("name", flat=True))
 
-    # Fetch dream role required skills
+    # --- Resume Analysis (if user clicks button or has resume) ---
+    extracted_skills = []
+    if request.method == "POST" and "analyze_resume" in request.POST:
+        if profile.resume:
+            try:
+                extracted_skills = extract_skills_from_resume(profile.resume.path)
+                # merge extracted skills with existing user skills (avoid duplicates)
+                user_skills = list(set(user_skills + extracted_skills))
+            except Exception as e:
+                print("Error reading resume:", e)
+        else:
+            print("⚠️ No resume uploaded!")
+
+    # --- Dream Role Skills ---
     dream_role_skills = list(dream_role.skills.values_list("name", flat=True)) if dream_role else []
 
-    # Skill matching logic
+    # --- Skill Matching ---
     matched_skills = [skill for skill in user_skills if skill in dream_role_skills]
     missing_skills = [skill for skill in dream_role_skills if skill not in user_skills]
 
-    # (Optional) Recommend related skills for improvement — can be static or ML-based later
-    # Example: based on missing skills, recommend similar or complementary skills
+    # --- Basic Recommendations ---
     recommendations = []
     if "Python" in missing_skills:
-        recommendations.append("Learn Django or Flask for backend dev")
+        recommendations.append("Learn Django or Flask for backend development.")
     if "Machine Learning" in missing_skills:
-        recommendations.append("Explore TensorFlow or Scikit-learn")
+        recommendations.append("Explore TensorFlow or Scikit-learn.")
     if "Communication" in missing_skills:
-        recommendations.append("Practice with public speaking or presentation tools")
+        recommendations.append("Practice public speaking or take a communication course.")
 
     context = {
         "profile": profile,
@@ -151,6 +167,27 @@ def skill_analysis(request):
         "matched_skills": matched_skills,
         "missing_skills": missing_skills,
         "recommendations": recommendations,
+        "extracted_skills": extracted_skills,
     }
 
     return render(request, "skill_analysis.html", context)
+
+@login_required(login_url='login')
+def resume_analyzer(request):
+    profile = request.user.profile
+    if not profile.resume:
+        messages.error(request, "Please upload a resume first in your profile.")
+        return redirect('my_profile')
+
+    # ✅ Extract skills using your utils.py function
+    from .utils import extract_skills_from_resume
+    extracted_skills = extract_skills_from_resume(profile.resume.path)
+
+    # Add extracted skills to user's profile (optional)
+    for skill_name in extracted_skills:
+        skill_obj, created = Skill.objects.get_or_create(name=skill_name)
+        profile.skills.add(skill_obj)
+
+    profile.save()
+    messages.success(request, "Resume analyzed successfully! Skills updated.")
+    return redirect('skill_analysis')

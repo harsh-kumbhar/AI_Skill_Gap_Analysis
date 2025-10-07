@@ -18,4 +18,6 @@ urlpatterns = [
     path("my_profile/", views.my_profile, name="my_profile"),
 
     path("skill_analysis/", views.skill_analysis, name="skill_analysis"),
+    path("resume_analyzer/", views.resume_analyzer, name="resume_analyzer"),  # ✅ add this line
+
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
