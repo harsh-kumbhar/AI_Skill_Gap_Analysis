@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Profile,Skill,DreamRole
+from core.utils import get_ai_recommendations
 
 def home_view(request):
     return render(request, 'register.html')
@@ -151,13 +152,9 @@ def skill_analysis(request):
     missing_skills = [skill for skill in dream_role_skills if skill not in user_skills]
 
     # --- Basic Recommendations ---
-    recommendations = []
-    if "Python" in missing_skills:
-        recommendations.append("Learn Django or Flask for backend development.")
-    if "Machine Learning" in missing_skills:
-        recommendations.append("Explore TensorFlow or Scikit-learn.")
-    if "Communication" in missing_skills:
-        recommendations.append("Practice public speaking or take a communication course.")
+    ai_recommendations = []
+    if dream_role:
+        ai_recommendations = get_ai_recommendations(dream_role.name, user_skills)
 
     context = {
         "profile": profile,
@@ -166,7 +163,7 @@ def skill_analysis(request):
         "dream_role_skills": dream_role_skills,
         "matched_skills": matched_skills,
         "missing_skills": missing_skills,
-        "recommendations": recommendations,
+        "recommendations": ai_recommendations,
         "extracted_skills": extracted_skills,
     }
 
