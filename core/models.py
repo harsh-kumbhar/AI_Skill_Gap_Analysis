@@ -16,6 +16,7 @@ class Profile(models.Model):
     )
 
     SALARY_CHOICES = (
+        ('--','Unemployed/Unpaid Intern'),
         ('<3L', 'Less than 3 LPA'),
         ('3-6L', '3-6 LPA'),
         ('6-10L', '6-10 LPA'),

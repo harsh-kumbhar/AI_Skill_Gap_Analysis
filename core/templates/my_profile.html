@@ -69,6 +69,7 @@
       <label class="form-label">Current Salary</label>
       <select name="current_salary" class="form-select">
         <option value=""><-- Select Salary --></option>
+         <option value="<3L" {% if profile.current_salary == "--" %}selected{% endif %}>--</option>
         <option value="<3L" {% if profile.current_salary == "<3L" %}selected{% endif %}><3L</option>
         <option value="3-6L" {% if profile.current_salary == "3-6L" %}selected{% endif %}>3-6L</option>
         <option value="6-10L" {% if profile.current_salary == "6-10L" %}selected{% endif %}>6-10L</option>

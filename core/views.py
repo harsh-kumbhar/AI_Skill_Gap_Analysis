@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Profile,Skill,DreamRole
-from core.utils import get_ai_recommendations
+from core.utils import get_ai_recommendations,recommend_courses
 
 def home_view(request):
     return render(request, 'register.html')
@@ -188,3 +188,22 @@ def resume_analyzer(request):
     profile.save()
     messages.success(request, "Resume analyzed successfully! Skills updated.")
     return redirect('skill_analysis')
+
+@login_required(login_url='login')
+def course_recommendations(request):
+    profile = request.user.profile
+    dream_role = profile.dream_role
+
+    user_skills = list(profile.skills.values_list("name", flat=True))
+    dream_role_skills = list(dream_role.skills.values_list("name", flat=True)) if dream_role else []
+
+    missing_skills = [s for s in dream_role_skills if s not in user_skills]
+
+    courses = recommend_courses(missing_skills)
+
+    context = {
+        "profile": profile,
+        "missing_skills": missing_skills,
+        "courses": courses,
+    }
+    return render(request, "course_recommendations.html", context)

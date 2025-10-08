@@ -18,6 +18,7 @@ urlpatterns = [
     path("my_profile/", views.my_profile, name="my_profile"),
 
     path("skill_analysis/", views.skill_analysis, name="skill_analysis"),
-    path("resume_analyzer/", views.resume_analyzer, name="resume_analyzer"),  # ✅ add this line
+    path("resume_analyzer/", views.resume_analyzer, name="resume_analyzer"),  
+    path("course-recommendations/", views.course_recommendations, name="course_recommendations"),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

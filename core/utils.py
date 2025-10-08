@@ -77,3 +77,20 @@ def get_ai_recommendations(dream_role_name, user_skills, dataset_path="core/data
     except Exception as e:
         print(f"Error in AI recommendation: {e}")
         return ["⚠️ Error generating recommendations."]
+
+
+def recommend_courses(missing_skills):
+    df = pd.read_csv("core/data/course_data.csv")
+    recommendations = []
+
+    for skill in missing_skills:
+        matches = df[df['skill'].str.lower() == skill.lower()]
+        for _, row in matches.iterrows():
+            recommendations.append({
+                'skill': skill,
+                'course_name': row['course_name'],
+                'platform': row['platform'],
+                'url': row['url'],
+                'description': row['description']
+            })
+    return recommendations
