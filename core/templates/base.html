@@ -19,23 +19,30 @@
     body {
       background-color: #f8f9fc;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: background-color 0.3s, color 0.3s;
+      color: #000000;
     }
+    body.dark-mode {
+      background-color: #121212;
+      color: #ffffff;
+    }
+
+    /* Sidebar Styles */
     .sidebar {
       position: fixed;
       top: 0;
       left: 0;
       height: 100%;
-      width: 220px;
+      width: 250px;
       background: linear-gradient(180deg, #1c2b4d, #16243a);
       color: #fff;
       padding: 20px 10px;
       overflow-y: auto;
       box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+      transition: background 0.3s;
     }
-    .sidebar h2 {
-      font-size: 20px;
-      margin-bottom: 20px;
-      text-align: center;
+    body.dark-mode .sidebar {
+      background: linear-gradient(180deg, #0d1117, #0a0e14);
     }
     .sidebar a {
       display: block;
@@ -49,32 +56,244 @@
       background: rgba(255,255,255,0.1);
       color: #fff;
     }
+
+    /* Content Area */
     .content {
-      margin-left: 220px;
+      margin-left: 250px;
       padding: 30px;
-      width: calc(100% - 220px);
+      width: calc(100% - 250px);
     }
+
+    /* Footer */
     footer {
       margin-top: 30px;
       text-align: center;
       color: #777;
+      transition: color 0.3s;
+    }
+    body.dark-mode footer {
+      color: #bbb;
     }
 
-    /* Sidebar Profile Section */
-    .sidebar-profile {
-      text-align: center;
-      margin-bottom: 25px;
+    /* Card Styles for Dark Mode */
+    .card {
+      background-color: #ffffff;
+      color: #000000;
+      border: 1px solid #ddd;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
     }
-    .sidebar-profile img {
-      border: 3px solid #f8f9fa;
-      box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
-      object-fit: cover;
+    body.dark-mode .card {
+      background-color: #1e1e1e;
+      color: #ffffff;
+      border: 1px solid #333;
     }
-    .sidebar-profile h5 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-top: 10px;
-      color: #fff;
+
+    /* Form Controls for Dark Mode */
+    .form-control, .form-select {
+      background-color: #ffffff;
+      color: #000000;
+      border: 1px solid #ced4da;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+      background-color: #2c2c2c;
+      color: #ffffff;
+      border: 1px solid #555;
+    }
+    body.dark-mode .form-control::placeholder {
+      color: #aaaaaa;
+    }
+    body.dark-mode .form-select option {
+      background-color: #2c2c2c;
+      color: #ffffff;
+    }
+
+    /* Form Check Inputs */
+    body.dark-mode .form-check-input {
+      background-color: #2c2c2c;
+      border-color: #555;
+    }
+    body.dark-mode .form-check-input:checked {
+      background-color: #4caf50;
+      border-color: #4caf50;
+    }
+
+    /* Buttons */
+    .btn-success {
+      background-color: #4caf50;
+      border-color: #4caf50;
+      color: #ffffff;
+    }
+    body.dark-mode .btn-success {
+      background-color: #388e3c;
+      border-color: #388e3c;
+    }
+    .btn-primary {
+      background-color: #007bff;
+      border-color: #007bff;
+      color: #ffffff;
+    }
+    body.dark-mode .btn-primary {
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+    .btn-outline-primary {
+      color: #007bff;
+      border-color: #007bff;
+    }
+    body.dark-mode .btn-outline-primary {
+      color: #66b3ff;
+      border-color: #66b3ff;
+    }
+    body.dark-mode .btn-outline-primary:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+      color: #ffffff;
+    }
+    .btn-outline-secondary {
+      color: #6c757d;
+      border-color: #6c757d;
+    }
+    body.dark-mode .btn-outline-secondary {
+      color: #adb5bd;
+      border-color: #adb5bd;
+    }
+
+    /* Text Colors */
+    body.dark-mode h1, 
+    body.dark-mode h2, 
+    body.dark-mode h3, 
+    body.dark-mode h4, 
+    body.dark-mode h5, 
+    body.dark-mode h6 {
+      color: #ffffff;
+    }
+    
+    body.dark-mode p,
+    body.dark-mode span,
+    body.dark-mode label,
+    body.dark-mode small {
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .text-muted {
+      color: #aaaaaa !important;
+    }
+    
+    body.dark-mode .text-dark {
+      color: #ffffff !important;
+    }
+
+    body.dark-mode .text-secondary {
+      color: #adb5bd !important;
+    }
+
+    /* Badge Colors */
+    .badge {
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark-mode .badge.bg-primary {
+      background-color: #0056b3 !important;
+      color: #ffffff;
+    }
+    body.dark-mode .badge.bg-success {
+      background-color: #388e3c !important;
+      color: #ffffff;
+    }
+    body.dark-mode .badge.bg-warning {
+      background-color: #f57c00 !important;
+      color: #ffffff;
+    }
+    body.dark-mode .badge.bg-success-subtle {
+      background-color: #1e4620 !important;
+      color: #c3e6cb !important;
+      border-color: #1e4620 !important;
+    }
+    body.dark-mode .badge.bg-warning-subtle {
+      background-color: #4a3c1c !important;
+      color: #ffeeba !important;
+      border-color: #4a3c1c !important;
+    }
+    body.dark-mode .badge.bg-light {
+      background-color: #2c2c2c !important;
+      color: #66b3ff !important;
+      border-color: #555 !important;
+    }
+
+    /* Progress Bar */
+    .progress {
+      background-color: #e9ecef;
+      transition: background-color 0.3s;
+    }
+    body.dark-mode .progress {
+      background-color: #2c2c2c;
+    }
+    body.dark-mode .progress-bar {
+      background-color: #4caf50;
+    }
+
+    /* Border and Background utilities */
+    body.dark-mode .border {
+      border-color: #444 !important;
+    }
+    body.dark-mode .border-dashed {
+      border-color: #555 !important;
+    }
+    body.dark-mode .bg-light {
+      background-color: #1e1e1e !important;
+    }
+    body.dark-mode .bg-white {
+      background-color: #1e1e1e !important;
+    }
+
+    /* Links */
+    body.dark-mode a:not(.btn):not(.sidebar a) {
+      color: #66b3ff;
+    }
+    body.dark-mode a:not(.btn):not(.sidebar a):hover {
+      color: #99ccff;
+    }
+
+    /* Alert Messages */
+    body.dark-mode .alert {
+      background-color: #2c2c2c;
+      border-color: #555;
+      color: #ffffff;
+    }
+
+    /* Select2 Dark Mode */
+    body.dark-mode .select2-container--default .select2-selection--multiple {
+      background-color: #2c2c2c;
+      border-color: #555;
+    }
+    body.dark-mode .select2-container--default .select2-selection--multiple .select2-selection__choice {
+      background-color: #0056b3;
+      color: #ffffff;
+      border-color: #0056b3;
+    }
+    body.dark-mode .select2-dropdown {
+      background-color: #2c2c2c;
+      border-color: #555;
+    }
+    body.dark-mode .select2-container--default .select2-results__option {
+      background-color: #2c2c2c;
+      color: #ffffff;
+    }
+    body.dark-mode .select2-container--default .select2-results__option--highlighted {
+      background-color: #0056b3;
+    }
+
+    /* Image and thumbnail styles */
+    body.dark-mode .img-thumbnail {
+      background-color: #2c2c2c;
+      border-color: #555;
+    }
+
+    /* Rounded elements */
+    body.dark-mode .rounded-3,
+    body.dark-mode .rounded-4 {
+      background-color: #1e1e1e;
     }
   </style>
 </head>
@@ -83,18 +302,17 @@
 <div class="d-flex">
   <!-- Sidebar -->
   <div class="sidebar">
-
     <!-- Profile section -->
-    <div class="sidebar-profile">
+    <div class="sidebar-profile text-center mb-4">
       {% if profile and profile.profile_pic %}
         <img src="{{ profile.profile_pic.url }}" alt="Profile Picture" class="rounded-circle" width="80" height="80">
       {% else %}
         <img src="{% static 'images/default-avatar.png' %}" alt="Default Avatar" class="rounded-circle" width="80" height="80">
       {% endif %}
-      <h5>{{ user.username }}</h5>
+      <h5 class="mt-2">{{ user.username }}</h5>
     </div>
 
-    <h2><i class="bi bi-speedometer2 me-2"></i> Dashboard</h2>
+    <h2 class="h5"><i class="bi bi-speedometer2 me-2"></i> Dashboard</h2>
     <a href="{% url 'dashboard' %}"><i class="bi bi-house-door me-2"></i> Home</a>
     <a href="{% url 'my_profile' %}"><i class="bi bi-person-circle me-2"></i> My Profile</a>
     <a href="{% url 'skill_analysis' %}"><i class="bi bi-bar-chart-line me-2"></i> Skill Analysis</a>
@@ -103,6 +321,13 @@
 
   <!-- Main content -->
   <div class="flex-grow-1 content">
+    <!-- Dark Mode Toggle -->
+    <div class="d-flex justify-content-end mb-3">
+      <button id="dark-mode-toggle" class="btn btn-outline-secondary">
+        <i class="bi bi-moon" id="theme-icon"></i> <span id="theme-text">Dark Mode</span>
+      </button>
+    </div>
+
     <!-- Messages -->
     {% if messages %}
       <div class="messages">
@@ -130,6 +355,38 @@
 
 <!-- Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- Dark Mode Script -->
+<script>
+  const toggleButton = document.getElementById('dark-mode-toggle');
+  const themeIcon = document.getElementById('theme-icon');
+  const themeText = document.getElementById('theme-text');
+  const userPrefersDark = localStorage.getItem('theme') === 'dark';
+
+  function updateThemeUI(isDark) {
+    if (isDark) {
+      themeIcon.classList.remove('bi-moon');
+      themeIcon.classList.add('bi-sun');
+      themeText.textContent = 'Light Mode';
+    } else {
+      themeIcon.classList.remove('bi-sun');
+      themeIcon.classList.add('bi-moon');
+      themeText.textContent = 'Dark Mode';
+    }
+  }
+
+  if (userPrefersDark) {
+    document.body.classList.add('dark-mode');
+    updateThemeUI(true);
+  }
+
+  toggleButton.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    updateThemeUI(isDarkMode);
+  });
+</script>
 
 <!-- Custom Script Block -->
 {% block extra_js %}{% endblock %}

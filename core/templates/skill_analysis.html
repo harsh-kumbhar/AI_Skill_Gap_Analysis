@@ -14,7 +14,7 @@
   </div>
 
   <!-- Profile Card -->
-  <div class="card border-0 shadow-lg mb-5 rounded-4 p-4 bg-light">
+  <div class="card border-0 shadow-lg mb-5 rounded-4 p-4">
     <div class="d-flex flex-wrap align-items-center text-center text-md-start">
       {% if profile.profile_pic %}
         <img src="{{ profile.profile_pic.url }}" alt="Profile Picture"
@@ -71,12 +71,12 @@
         {% endfor %}
       </div>
     {% else %}
-      <p class="text-muted">No missing skills — great job!</p>
+      <p class="text-muted">No missing skills – great job!</p>
     {% endif %}
   </div>
 
   <!-- 4️⃣ AI Recommendations -->
-  <div class="card border-0 shadow-sm rounded-4 p-4 bg-gradient-light mb-5">
+  <div class="card border-0 shadow-sm rounded-4 p-4 recommendations-card mb-5">
     <h5 class="fw-bold text-primary mb-3">
       <i class="bi bi-lightbulb me-2"></i>AI Recommendations
     </h5>
@@ -100,8 +100,8 @@
     <div class="row">
       {% for job in job_matches %}
       <div class="col-md-6 mb-4">
-        <div class="p-3 rounded-3 border h-100 bg-white hover-card">
-          <h6 class="fw-bold text-dark mb-2">{{ job.job_title }}</h6>
+        <div class="card p-3 rounded-3 border h-100 hover-card">
+          <h6 class="fw-bold mb-2">{{ job.job_title }}</h6>
           <div class="progress mb-2" style="height: 8px;">
             <div class="progress-bar bg-success" role="progressbar" 
                  style="width: {{ job.score }}%;" 
@@ -135,25 +135,61 @@
 <!-- ✅ Chart.js Visualization -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  const ctx = document.getElementById('matchChart');
-  if (ctx) {
-    new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Matched Skills', 'Missing Skills'],
-        datasets: [{
-          data: [{{ matched_skills|length }}, {{ missing_skills|length }}],
-          backgroundColor: ['#28a745', '#ffc107'],
-          borderWidth: 0
-        }]
-      },
-      options: {
-        cutout: '70%',
-        maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom' } }
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('matchChart');
+    let matchChart = null;
+    
+    function createChart() {
+      const isDarkMode = document.body.classList.contains('dark-mode');
+      const legendColor = isDarkMode ? '#ffffff' : '#333333';
+      
+      if (ctx) {
+        if (matchChart) {
+          matchChart.destroy();
+        }
+        
+        matchChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Matched Skills', 'Missing Skills'],
+            datasets: [{
+              data: [{{ matched_skills|length }}, {{ missing_skills|length }}],
+              backgroundColor: ['#28a745', '#ffc107'],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            cutout: '70%',
+            maintainAspectRatio: false,
+            plugins: { 
+              legend: { 
+                position: 'bottom',
+                labels: {
+                  color: legendColor,
+                  font: {
+                    size: 14,
+                    weight: '500'
+                  },
+                  padding: 15
+                }
+              } 
+            }
+          }
+        });
       }
-    });
-  }
+    }
+    
+    // Wait a bit for dark mode to be applied from localStorage
+    setTimeout(createChart, 50);
+    
+    // Listen for dark mode toggle and recreate chart
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    if (darkModeToggle) {
+      darkModeToggle.addEventListener('click', function() {
+        setTimeout(createChart, 150);
+      });
+    }
+  });
 </script>
 
 <style>
@@ -162,15 +198,38 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-  .bg-gradient-light {
+  
+  body.dark-mode .text-gradient {
+    background: linear-gradient(90deg, #66b3ff, #66bb6a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .recommendations-card {
     background: linear-gradient(180deg, #ffffff, #f8f9fa);
   }
+  
+  body.dark-mode .recommendations-card {
+    background: linear-gradient(180deg, #1e1e1e, #2c2c2c);
+  }
+
+  .hover-card {
+    transition: all 0.2s ease;
+  }
+  
   .hover-card:hover {
     transform: translateY(-4px);
-    transition: all 0.2s ease;
     box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.1);
   }
-  .badge { font-size: 0.9rem; }
+  
+  body.dark-mode .hover-card:hover {
+    box-shadow: 0 0.75rem 1.25rem rgba(255,255,255,0.1);
+  }
+
+  .badge { 
+    font-size: 0.9rem; 
+  }
+
   .recommendation-text p {
     font-size: 1rem;
     line-height: 1.6;
@@ -179,18 +238,58 @@
     padding: 0.75rem 1rem;
     border-radius: 10px;
     margin-bottom: 0.75rem;
-    border-left: 4px solid #0d6efd1a;
+    border-left: 4px solid rgba(13, 110, 253, 0.1);
     transition: all 0.2s ease;
   }
+  
+  body.dark-mode .recommendation-text p {
+    color: #e0e0e0;
+    background: #2c2c2c;
+    border-left-color: rgba(102, 179, 255, 0.3);
+  }
+
   .recommendation-text p:hover {
     background: #e9f3ff;
     border-left-color: #0d6efd;
     transform: translateX(4px);
   }
-  .bg-success-subtle { background-color: #e9f7ef !important; }
-  .bg-warning-subtle { background-color: #fff8e1 !important; }
-  .border-success-subtle { border-color: #c3e6cb !important; }
-  .border-warning-subtle { border-color: #ffeeba !important; }
+  
+  body.dark-mode .recommendation-text p:hover {
+    background: #3a3a3a;
+    border-left-color: #66b3ff;
+  }
+
+  .bg-success-subtle { 
+    background-color: #e9f7ef !important; 
+  }
+  .bg-warning-subtle { 
+    background-color: #fff8e1 !important; 
+  }
+  .border-success-subtle { 
+    border-color: #c3e6cb !important; 
+  }
+  .border-warning-subtle { 
+    border-color: #ffeeba !important; 
+  }
+
+  /* Dark mode badge adjustments */
+  body.dark-mode .bg-success-subtle { 
+    background-color: #1e4620 !important; 
+    color: #c3e6cb !important;
+  }
+  body.dark-mode .bg-warning-subtle { 
+    background-color: #4a3c1c !important; 
+    color: #ffeeba !important;
+  }
+  body.dark-mode .text-success {
+    color: #66bb6a !important;
+  }
+  body.dark-mode .text-warning {
+    color: #ffa726 !important;
+  }
+  body.dark-mode .text-info {
+    color: #4fc3f7 !important;
+  }
 </style>
 
 {% endblock %}

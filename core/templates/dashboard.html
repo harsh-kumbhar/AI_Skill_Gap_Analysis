@@ -53,8 +53,8 @@
     <div class="row">
       {% for job in job_matches_short %}
       <div class="col-md-6 mb-3">
-        <div class="border rounded-3 p-3 h-100">
-          <h5 class="fw-bold text-dark mb-2">{{ job.job_title }}</h5>
+        <div class="card border p-3 h-100">
+          <h5 class="fw-bold mb-2">{{ job.job_title }}</h5>
           <div class="progress mb-2" style="height: 10px;">
             <div class="progress-bar bg-success" role="progressbar" 
                  style="width: {{ job.score }}%;" 
@@ -121,10 +121,53 @@
 </div>
 
 <style>
-.bg-success-subtle { background-color: #e9f7ef !important; }
-.bg-warning-subtle { background-color: #fff8e1 !important; }
-.border-success-subtle { border-color: #c3e6cb !important; }
-.border-warning-subtle { border-color: #ffeeba !important; }
+/* Subtle background colors for badges */
+.bg-success-subtle { 
+  background-color: #e9f7ef !important; 
+}
+.bg-warning-subtle { 
+  background-color: #fff8e1 !important; 
+}
+.border-success-subtle { 
+  border-color: #c3e6cb !important; 
+}
+.border-warning-subtle { 
+  border-color: #ffeeba !important; 
+}
+
+/* Dark mode badge adjustments */
+body.dark-mode .bg-success-subtle { 
+  background-color: #1e4620 !important; 
+  color: #c3e6cb !important;
+}
+body.dark-mode .bg-warning-subtle { 
+  background-color: #4a3c1c !important; 
+  color: #ffeeba !important;
+}
+body.dark-mode .text-success {
+  color: #66bb6a !important;
+}
+body.dark-mode .text-warning {
+  color: #ffa726 !important;
+}
+body.dark-mode .btn-outline-warning {
+  color: #ffa726;
+  border-color: #ffa726;
+}
+body.dark-mode .btn-outline-warning:hover {
+  background-color: #f57c00;
+  border-color: #f57c00;
+  color: #ffffff;
+}
+body.dark-mode .btn-outline-success {
+  color: #66bb6a;
+  border-color: #66bb6a;
+}
+body.dark-mode .btn-outline-success:hover {
+  background-color: #388e3c;
+  border-color: #388e3c;
+  color: #ffffff;
+}
 </style>
 
 {% endblock %}

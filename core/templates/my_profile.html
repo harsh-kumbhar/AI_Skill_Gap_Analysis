@@ -68,8 +68,8 @@
     <div class="mb-3">
       <label class="form-label">Current Salary</label>
       <select name="current_salary" class="form-select">
-        <option value=""><-- Select Salary --></option>
-         <option value="<3L" {% if profile.current_salary == "--" %}selected{% endif %}>--</option>
+        <option value="">-- Select Salary --</option>
+        <option value="<3L" {% if profile.current_salary == "--" %}selected{% endif %}>--</option>
         <option value="<3L" {% if profile.current_salary == "<3L" %}selected{% endif %}><3L</option>
         <option value="3-6L" {% if profile.current_salary == "3-6L" %}selected{% endif %}>3-6L</option>
         <option value="6-10L" {% if profile.current_salary == "6-10L" %}selected{% endif %}>6-10L</option>
@@ -77,21 +77,19 @@
       </select>
     </div>
   
-<!-- Dream Role -->
-<div class="mb-3">
-  <label class="form-label">Dream Role</label>
-  <select name="dream_role" class="form-select select2">
-    <option value="">-- Select Dream Role --</option>
-    {% for role in all_dream_roles %}
-      <option value="{{ role.id }}" 
-        {% if profile.dream_role and profile.dream_role.id == role.id %}selected{% endif %}>
-        {{ role.name }}
-      </option>
-    {% endfor %}
-  </select>
-</div>
-
-
+    <!-- Dream Role -->
+    <div class="mb-3">
+      <label class="form-label">Dream Role</label>
+      <select name="dream_role" class="form-select select2">
+        <option value="">-- Select Dream Role --</option>
+        {% for role in all_dream_roles %}
+          <option value="{{ role.id }}" 
+            {% if profile.dream_role and profile.dream_role.id == role.id %}selected{% endif %}>
+            {{ role.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
 
     <!-- Profile Picture Upload -->
     <div class="mb-3">
@@ -108,10 +106,10 @@
     <!-- Resume Upload (Drag & Drop) -->
     <div class="mb-3">
       <label class="form-label">Upload Resume (PDF)</label>
-      <div id="resume-dropzone" class="border border-2 border-dashed rounded p-4 text-center bg-light">
+      <div id="resume-dropzone" class="border border-2 border-dashed rounded p-4 text-center resume-dropzone">
         <i class="bi bi-upload fs-2 text-success"></i>
         <p class="mt-2 mb-1">Drag & Drop your resume here or click to browse</p>
-      <input type="file" name="resume" id="resume-input" class="d-none" accept="application/pdf">
+        <input type="file" name="resume" id="resume-input" class="d-none" accept="application/pdf">
       </div>
       {% if profile.resume %}
         <p class="mt-2">Current Resume: <a href="{{ profile.resume.url }}" target="_blank">View Resume</a></p>
@@ -124,6 +122,21 @@
     </div>
   </form>  
 </div>
+
+<style>
+.resume-dropzone {
+  background-color: #f8f9fa;
+  transition: background-color 0.3s, color 0.3s;
+}
+body.dark-mode .resume-dropzone {
+  background-color: #2c2c2c;
+  color: #ffffff;
+}
+body.dark-mode .resume-dropzone.drag-over {
+  background-color: #388e3c !important;
+  color: #ffffff !important;
+}
+</style>
 {% endblock %}
 
 {% block extra_js %}
@@ -155,16 +168,16 @@
 
   dropzone.addEventListener("dragover", (e) => {
     e.preventDefault();
-    dropzone.classList.add("bg-success", "text-white");
+    dropzone.classList.add("drag-over", "bg-success", "text-white");
   });
 
   dropzone.addEventListener("dragleave", () => {
-    dropzone.classList.remove("bg-success", "text-white");
+    dropzone.classList.remove("drag-over", "bg-success", "text-white");
   });
 
   dropzone.addEventListener("drop", (e) => {
     e.preventDefault();
-    dropzone.classList.remove("bg-success", "text-white");
+    dropzone.classList.remove("drag-over", "bg-success", "text-white");
     resumeInput.files = e.dataTransfer.files;
   });
 </script>
