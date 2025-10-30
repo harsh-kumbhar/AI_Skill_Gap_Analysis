@@ -3,8 +3,18 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Profile,Skill,DreamRole
-from core.utils import get_ai_recommendations,recommend_courses
+from .models import Profile, Skill, DreamRole
+
+# Import utilities including the new ranking function
+from core.utils import (
+    get_ai_recommendations,
+    recommend_courses,
+    rank_jobs_for_user,
+    extract_skills_from_resume as _extract_skills_from_resume  # local alias to avoid name clash
+)
+
+# If you have a separate utils.extract_skills_from_resume import earlier, keep using that one.
+# We'll call the resume helper inside the view by name extract_skills_from_resume below.
 
 def home_view(request):
     return render(request, 'register.html')
@@ -61,10 +71,17 @@ def logout_user(request):
 @login_required
 def dashboard(request):
     profile = Profile.objects.get(user=request.user)
+
+    # Show top 2 job matches on dashboard (quick summary)
+    user_skills = list(profile.skills.values_list("name", flat=True))
+    job_matches_short = rank_jobs_for_user(user_skills, top_n=2)
+
     context = {
-        "profile": profile
+        "profile": profile,
+        "job_matches_short": job_matches_short
     }
     return render(request, "dashboard.html", context)
+
 
 @login_required(login_url='login')
 def my_profile(request):
@@ -75,13 +92,12 @@ def my_profile(request):
         profile.dob = request.POST.get("dob") or None
         profile.gender = request.POST.get("gender")
 
-                # ✅ Correct dream_role assignment
+        # ✅ Correct dream_role assignment
         dream_role_id = request.POST.get("dream_role")
         if dream_role_id:
             profile.dream_role_id = dream_role_id
         else:
             profile.dream_role = None
-
 
         # ✅ Skills handling (IDs + new skill names)
         selected_skills = request.POST.getlist("skills[]")
@@ -98,7 +114,6 @@ def my_profile(request):
 
         profile.current_job = request.POST.get("current_job")
         profile.current_salary = request.POST.get("current_salary")
-
 
         # Resume file upload
         if request.FILES.get("resume"):
@@ -121,7 +136,8 @@ def my_profile(request):
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from .utils import extract_skills_from_resume  # 👈 make sure utils.py is in the same app
+from .utils import extract_skills_from_resume  # keep existing import if needed
+
 
 @login_required(login_url='login')
 def skill_analysis(request):
@@ -156,6 +172,10 @@ def skill_analysis(request):
     if dream_role:
         ai_recommendations = get_ai_recommendations(dream_role.name, user_skills)
 
+    # --- NEW: Job Matches based on current skills (Feature A) ---
+    # Use Jaccard ranking from utils.py
+    job_matches = rank_jobs_for_user(user_skills, top_n=5, use_semantic=False)
+
     context = {
         "profile": profile,
         "dream_role": dream_role,
@@ -165,9 +185,11 @@ def skill_analysis(request):
         "missing_skills": missing_skills,
         "recommendations": ai_recommendations,
         "extracted_skills": extracted_skills,
+        "job_matches": job_matches,   # <-- new
     }
 
     return render(request, "skill_analysis.html", context)
+
 
 @login_required(login_url='login')
 def resume_analyzer(request):
@@ -188,6 +210,7 @@ def resume_analyzer(request):
     profile.save()
     messages.success(request, "Resume analyzed successfully! Skills updated.")
     return redirect('skill_analysis')
+
 
 @login_required(login_url='login')
 def course_recommendations(request):

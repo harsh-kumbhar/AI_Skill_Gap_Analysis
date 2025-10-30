@@ -8,8 +8,6 @@
   <div class="text-center mb-5">
     <h2 class="fw-bold display-6 text-gradient">Skill Analysis Tool 🧠</h2>
     <p class="text-muted fs-5">See how close you are to your dream role and get personalized growth insights.</p>
-    
-    <!-- 🔹 Resume Analyzer Button -->
     <a href="{% url 'resume_analyzer' %}" class="btn btn-outline-primary mt-3 px-4 py-2 rounded-pill shadow-sm">
       <i class="bi bi-file-earmark-text me-2"></i>Analyze Resume
     </a>
@@ -39,7 +37,6 @@
   <!-- 1️⃣ Skill Match Overview -->
   <div class="card border-0 shadow-sm mb-5 rounded-4 p-4">
     <h5 class="fw-bold text-center mb-3">Skill Match Overview</h5>
-
     <div style="width: 300px; height: 300px; margin: 0 auto;">
       <canvas id="matchChart"></canvas>
     </div>
@@ -78,27 +75,62 @@
     {% endif %}
   </div>
 
-<!-- 4️⃣ AI Recommendations -->
-<div class="card border-0 shadow-sm rounded-4 p-4 bg-gradient-light">
-  <h5 class="fw-bold text-primary mb-3">
-    <i class="bi bi-lightbulb me-2"></i>AI Recommendations
-  </h5>
+  <!-- 4️⃣ AI Recommendations -->
+  <div class="card border-0 shadow-sm rounded-4 p-4 bg-gradient-light mb-5">
+    <h5 class="fw-bold text-primary mb-3">
+      <i class="bi bi-lightbulb me-2"></i>AI Recommendations
+    </h5>
+    {% if recommendations %}
+      <div class="recommendation-text">
+        {% for rec in recommendations %}
+          {% if rec and rec != "---" %}
+            <p class="mb-3"><i class="bi bi-stars text-primary me-2"></i>{{ rec }}</p>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">No specific recommendations yet.</p>
+    {% endif %}
+  </div>
 
-  {% if recommendations %}
-    <div class="recommendation-text">
-      {% for rec in recommendations %}
-        {% if rec and rec != "---" %}
-          <p class="mb-3">
-            <i class="bi bi-stars text-primary me-2"></i>{{ rec }}
+  <!-- 5️⃣ Top Job Matches -->
+  {% if job_matches %}
+  <div class="card border-0 shadow-sm rounded-4 p-4">
+    <h5 class="fw-bold text-info mb-4"><i class="bi bi-briefcase-fill me-2"></i>Top Job Matches</h5>
+    <div class="row">
+      {% for job in job_matches %}
+      <div class="col-md-6 mb-4">
+        <div class="p-3 rounded-3 border h-100 bg-white hover-card">
+          <h6 class="fw-bold text-dark mb-2">{{ job.job_title }}</h6>
+          <div class="progress mb-2" style="height: 8px;">
+            <div class="progress-bar bg-success" role="progressbar" 
+                 style="width: {{ job.score }}%;" 
+                 aria-valuenow="{{ job.score }}" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+          <small class="text-muted d-block mb-2">Match Score: {{ job.score }}%</small>
+
+          <p class="mb-1"><strong>Matched:</strong>
+            {% for skill in job.matched_skills|slice:":4" %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle">{{ skill }}</span>
+            {% empty %}
+              <span class="text-muted">None yet</span>
+            {% endfor %}
           </p>
-        {% endif %}
+          <p class="mb-0"><strong>Missing:</strong>
+            {% for skill in job.missing_skills|slice:":4" %}
+              <span class="badge bg-warning-subtle text-warning border border-warning-subtle">{{ skill }}</span>
+            {% empty %}
+              <span class="text-muted">None 🎯</span>
+            {% endfor %}
+          </p>
+        </div>
+      </div>
       {% endfor %}
     </div>
-  {% else %}
-    <p class="text-muted">No specific recommendations yet.</p>
+  </div>
   {% endif %}
-</div>
 
+</div>
 
 <!-- ✅ Chart.js Visualization -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -118,9 +150,7 @@
       options: {
         cutout: '70%',
         maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom' }
-        }
+        plugins: { legend: { position: 'bottom' } }
       }
     });
   }
@@ -140,11 +170,7 @@
     transition: all 0.2s ease;
     box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.1);
   }
-  .badge {
-    font-size: 0.9rem;
-  }
-
-<style>
+  .badge { font-size: 0.9rem; }
   .recommendation-text p {
     font-size: 1rem;
     line-height: 1.6;
@@ -156,12 +182,15 @@
     border-left: 4px solid #0d6efd1a;
     transition: all 0.2s ease;
   }
-
   .recommendation-text p:hover {
     background: #e9f3ff;
     border-left-color: #0d6efd;
     transform: translateX(4px);
   }
+  .bg-success-subtle { background-color: #e9f7ef !important; }
+  .bg-warning-subtle { background-color: #fff8e1 !important; }
+  .border-success-subtle { border-color: #c3e6cb !important; }
+  .border-warning-subtle { border-color: #ffeeba !important; }
 </style>
 
 {% endblock %}

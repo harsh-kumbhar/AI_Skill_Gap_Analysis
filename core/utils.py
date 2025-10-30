@@ -157,3 +157,65 @@ def recommend_courses(missing_skills):
                 'description': row['description']
             })
     return recommendations
+
+
+from functools import lru_cache
+
+@lru_cache(maxsize=1)
+def load_job_roles_csv():
+    """Load and cache job roles dataset."""
+    try:
+        df = pd.read_csv("core/data/job_roles.csv")
+        df.columns = [c.strip().lower() for c in df.columns]
+        return df
+    except Exception as e:
+        print(f"Error loading job roles CSV: {e}")
+        return pd.DataFrame(columns=["job_title", "job_skill_set"])
+
+
+def rank_jobs_for_user(user_skills, top_n=5, use_semantic=False):
+    """
+    Rank job roles based on how well user's skills overlap with each role's required skills.
+    Returns a list of dicts containing job title, score, matched, and missing skills.
+    """
+    if not user_skills:
+        return []
+
+    df = load_job_roles_csv()
+    if df.empty:
+        return []
+
+    user_skills = [s.strip().title() for s in user_skills]
+    user_set = set([s.lower() for s in user_skills])
+    results = []
+
+    for _, row in df.iterrows():
+        try:
+            skills_list = ast.literal_eval(row["job_skill_set"])
+            skills_list = [s.strip().title() for s in skills_list]
+        except Exception:
+            continue
+
+        role_set = set([s.lower() for s in skills_list])
+        if not role_set:
+            continue
+
+        # Compute Jaccard Similarity = |intersection| / |union|
+        intersection = user_set.intersection(role_set)
+        union = user_set.union(role_set)
+        score = len(intersection) / len(union) if union else 0
+
+        matched = sorted(list(intersection))
+        missing = sorted(list(role_set - user_set))
+
+        results.append({
+            "job_title": row["job_title"],
+            "score": round(score * 100, 2),  # percentage for frontend display
+            "matched_skills": matched,
+            "missing_skills": missing,
+            "total_required": len(role_set),
+        })
+
+    # Sort by highest score
+    ranked = sorted(results, key=lambda x: x["score"], reverse=True)[:top_n]
+    return ranked
