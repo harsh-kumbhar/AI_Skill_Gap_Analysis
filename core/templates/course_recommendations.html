@@ -52,48 +52,101 @@
       </div>
     {% endif %}
   </div>
+
+  <!-- 🧭 Learning Roadmap Section -->
+  {% if roadmap.total_hours > 0 %}
+  <div class="card shadow-sm border-0 mt-5 p-4 rounded-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0"><i class="bi bi-map-fill me-2 text-primary"></i>Learning Roadmap</h5>
+      <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#customHoursModal">
+        <i class="bi bi-clock-history me-1"></i> Customize Weekly Hours
+      </button>
+    </div>
+
+    <div class="text-center mb-4">
+      <h3 class="fw-bold text-success mb-1">{{ roadmap.weeks_needed }} Weeks</h3>
+      <p class="text-muted mb-0">Based on {{ roadmap.total_hours }} total learning hours @ {{ hours_per_week }} hrs/week</p>
+    </div>
+
+    <!-- Per-skill progress breakdown -->
+    {% for item in roadmap.per_skill %}
+      {% with percent=item.hours|floatformat:0|add:"0"|divisibleby:roadmap.total_hours %}
+      <div class="mb-3">
+        <div class="d-flex justify-content-between">
+          <span class="fw-semibold">{{ item.skill }}</span>
+          <small class="text-muted">{{ item.hours }} hrs</small>
+        </div>
+        <div class="progress" style="height: 10px;">
+          <div class="progress-bar bg-success" role="progressbar"
+               style="width: {{ item.hours|floatformat:0|divisibleby:roadmap.total_hours|floatformat:0 }}%;"
+               aria-valuenow="{{ item.hours }}" aria-valuemin="0" aria-valuemax="{{ roadmap.total_hours }}">
+          </div>
+        </div>
+      </div>
+      {% endwith %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<!-- 🔧 Modal: Customize Weekly Hours -->
+<div class="modal fade" id="customHoursModal" tabindex="-1" aria-labelledby="customHoursModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow rounded-3">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="customHoursModalLabel">Customize Weekly Learning Hours</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST" action="{% url 'course_recommendations' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <label for="hours_per_week" class="form-label fw-semibold">Enter hours per week:</label>
+          <input type="number" id="hours_per_week" name="hours_per_week" class="form-control" value="{{ hours_per_week }}" min="1" max="60" required>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success w-100">Recalculate Roadmap</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <style>
   .hover-shadow {
     transition: all 0.3s ease;
   }
-  
   .hover-shadow:hover {
     transform: translateY(-4px);
     box-shadow: 0 6px 18px rgba(0,0,0,0.1);
   }
-  
-  body.dark-mode .hover-shadow:hover {
-    box-shadow: 0 6px 18px rgba(255,255,255,0.1);
+
+  .course-title { color: var(--text-color); }
+  .course-description { color: var(--text-color); opacity: 0.8; }
+
+  /* Roadmap styling */
+  .progress {
+    background-color: rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  [data-theme="dark"] .progress {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+  [data-theme="dark"] .progress-bar {
+    background-color: #66d9ef !important;
   }
 
-  .course-title {
-    color: #000000;
-  }
-  
-  body.dark-mode .course-title {
-    color: #ffffff;
+  .modal-content {
+    background: var(--card-bg);
+    color: var(--text-color);
   }
 
-  .course-description {
-    color: #6c757d;
-  }
-  
-  body.dark-mode .course-description {
-    color: #adb5bd;
+  .modal-header {
+    border-bottom: none;
   }
 
-  /* Badge styling for dark mode */
-  body.dark-mode .badge.bg-warning {
-    background-color: #f57c00 !important;
-    color: #ffffff !important;
-  }
-
-  body.dark-mode .badge.bg-light {
-    background-color: #2c2c2c !important;
-    color: #66b3ff !important;
-    border-color: #555 !important;
+  .modal-footer {
+    border-top: none;
   }
 </style>
 {% endblock %}

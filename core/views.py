@@ -10,6 +10,7 @@ from core.utils import (
     get_ai_recommendations,
     recommend_courses,
     rank_jobs_for_user,
+    estimate_learning_time,
     extract_skills_from_resume as _extract_skills_from_resume  # local alias to avoid name clash
 )
 
@@ -213,6 +214,8 @@ def resume_analyzer(request):
 
 
 @login_required(login_url='login')
+
+@login_required(login_url='login')
 def course_recommendations(request):
     profile = request.user.profile
     dream_role = profile.dream_role
@@ -221,12 +224,17 @@ def course_recommendations(request):
     dream_role_skills = list(dream_role.skills.values_list("name", flat=True)) if dream_role else []
 
     missing_skills = [s for s in dream_role_skills if s not in user_skills]
-
     courses = recommend_courses(missing_skills)
+
+    # 🆕 New: Learning time estimation
+    hours_per_week = int(request.POST.get("hours_per_week", 8))
+    roadmap = estimate_learning_time(missing_skills, hours_per_week)
 
     context = {
         "profile": profile,
         "missing_skills": missing_skills,
         "courses": courses,
+        "roadmap": roadmap,           # 👈 pass roadmap data
+        "hours_per_week": hours_per_week,
     }
     return render(request, "course_recommendations.html", context)

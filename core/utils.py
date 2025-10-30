@@ -2,8 +2,12 @@
 import re
 from PyPDF2 import PdfReader
 from .models import Skill
+import math
+import os
+import pandas as pd 
 
 def extract_skills_from_resume(pdf_file):
+
     """
     Extracts text from the uploaded resume PDF and detects known skills.
     Returns a list of matched skill names.
@@ -219,3 +223,77 @@ def rank_jobs_for_user(user_skills, top_n=5, use_semantic=False):
     # Sort by highest score
     ranked = sorted(results, key=lambda x: x["score"], reverse=True)[:top_n]
     return ranked
+
+
+import pandas as pd
+import math
+from functools import lru_cache
+
+@lru_cache(maxsize=1)
+def load_course_data():
+    """Cached read of the course_data CSV."""
+    return pd.read_csv("core/data/course_data.csv")
+
+def estimate_learning_time(missing_skills, hours_per_week=8):
+    """
+    Estimate total learning time and weeks needed to cover missing skills.
+    Uses course_data.csv which has columns: skill, course_name, platform, url, description
+    """
+    file_path = os.path.join(os.path.dirname(__file__), "data", "course_data.csv")
+
+    if not os.path.exists(file_path):
+        return {"total_hours": 0, "weeks_needed": 0, "per_skill": []}
+
+    df = pd.read_csv(file_path)
+
+    # Default assumed duration per course (in hours)
+    DEFAULT_DURATION = {
+        "Python": 30,
+        "Web Development": 40,
+        "Machine Learning": 45,
+        "AWS": 35,
+        "Excel": 25
+    }
+
+    per_skill_details = []
+    total_hours = 0
+
+    for skill in missing_skills:
+        skill_lower = skill.lower()
+
+        # Find matching courses for the skill
+        matches = df[df["skill"].str.lower().str.contains(skill_lower, na=False)]
+
+        if not matches.empty:
+            course = matches.iloc[0]  # take first match
+            duration = DEFAULT_DURATION.get(skill, 30)
+            total_hours += duration
+            per_skill_details.append({
+                "skill": skill,
+                "hours": duration,
+                "course_name": course["course_name"],
+                "platform": course["platform"],
+                "url": course["url"],
+                "description": course["description"]
+            })
+        else:
+            # No direct course found — still add an estimate
+            duration = DEFAULT_DURATION.get(skill, 30)
+            total_hours += duration
+            per_skill_details.append({
+                "skill": skill,
+                "hours": duration,
+                "course_name": "Course not found",
+                "platform": "-",
+                "url": "-",
+                "description": "No recommended course found for this skill."
+            })
+
+    # Estimate total weeks required
+    weeks_needed = math.ceil(total_hours / hours_per_week) if hours_per_week > 0 else 0
+
+    return {
+        "total_hours": total_hours,
+        "weeks_needed": weeks_needed,
+        "per_skill": per_skill_details
+    }
